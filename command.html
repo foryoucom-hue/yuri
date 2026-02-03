@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Commands - TEST BOT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #000000;
+      font-family: 'Roboto', system-ui, sans-serif;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+
+    body.loaded {
+      opacity: 1;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(100, 80, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100, 80, 255, 0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: -2;
+      opacity: 0.35;
+    }
+
+    /* PRELOADER */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+
+    #preloader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 6rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #00f0ff, #00aaff, #0066ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.7);
+      animation: pulse 2s infinite alternate;
+      margin-bottom: 20px;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.08); opacity: 1; }
+    }
+
+    .loader-text {
+      font-size: 1.8rem;
+      color: #a78bfa;
+      letter-spacing: 4px;
+      margin-bottom: 30px;
+    }
+
+    .loader-bar {
+      width: 300px;
+      height: 6px;
+      background: rgba(168, 139, 250, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .loader-progress {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #a78bfa, #c084fc);
+      animation: loading 3.5s ease-in-out forwards;
+    }
+
+    @keyframes loading {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(5, 5, 15, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(120, 100, 255, 0.12);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 50px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.8s ease 3.5s;
+    }
+
+    .navbar.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #c084fc, #7c3aed, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 50px;
+    }
+
+    .nav-menu a {
+      color: #d0d0ff;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-menu a:hover,
+    .nav-menu a.active {
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    }
+
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -8px;
+      left: 0;
+      background: linear-gradient(90deg, #c084fc, #a78bfa);
+      transition: width 0.4s ease;
+    }
+
+    .nav-menu a:hover::after,
+    .nav-menu a.active::after {
+      width: 100%;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 20px;
+    }
+
+    .btn-action {
+      padding: 10px 28px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-premium {
+      background: linear-gradient(135deg, #7c3aed, #c084fc);
+      color: white;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-premium:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 35px rgba(168, 85, 247, 0.8);
+    }
+
+    .btn-support {
+      background: transparent;
+      color: #d0d0ff;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-support:hover {
+      background: rgba(168, 85, 247, 0.12);
+      color: white;
+      border-color: #c084fc;
+    }
+
+    /* Stars & Meteor */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 16px rgba(255,255,255,0.4);
+      animation: twinkle 6s infinite alternate;
+      opacity: 0.9;
+    }
+
+    @keyframes twinkle {
+      0%,100% { opacity: 0.5; transform: scale(0.8); }
+      50%     { opacity: 1;   transform: scale(1.2); }
+    }
+
+    .meteor {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 20px 8px rgba(255,255,255,0.95),
+        0 0 50px 15px rgba(255,255,255,0.7),
+        0 0 90px 30px rgba(255,255,255,0.4);
+      transform: translate(-50%, -50%) rotate(45deg);
+      pointer-events: none;
+      animation: meteor linear forwards;
+    }
+
+    .meteor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -220px;
+      width: 220px;
+      height: 3.5px;
+      background: linear-gradient(to left, transparent, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+      transform: translateY(-50%);
+      opacity: 0.9;
+      filter: blur(1.8px);
+    }
+
+    .meteor::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -300px;
+      width: 300px;
+      height: 2.5px;
+      background: linear-gradient(to left, transparent, rgba(255,255,255,0.5));
+      transform: translateY(-50%);
+      opacity: 0.6;
+      filter: blur(4px);
+    }
+
+    @keyframes meteor {
+      0% { transform: translate(-50%, -50%) translate(0, 0) rotate(45deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) translate(-1200px, 1200px) rotate(45deg); opacity: 0; }
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 180px 60px 100px;
+      text-align: center;
+      position: relative;
+      z-index: 5;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 5.8rem;
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(90deg, #ffffff, #e0e0ff, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% auto;
+      animation: gradientFlow 8s linear infinite;
+      text-shadow: 0 0 20px rgba(255,255,255,0.6), 0 0 40px rgba(255,255,255,0.3);
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .hero-subtitle {
+      font-size: 1.6rem;
+      color: #b0b0ff;
+      max-width: 900px;
+      margin: 30px auto 60px;
+      line-height: 1.6;
+      text-shadow: 0 0 15px rgba(168,139,250,0.4);
+    }
+
+    /* Search Bar */
+    .search-container {
+      max-width: 700px;
+      margin: 0 auto 80px;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 20px 24px 20px 70px;
+      font-size: 1.15rem;
+      background: rgba(15, 10, 45, 0.65);
+      border: 2px solid rgba(168, 85, 247, 0.35);
+      border-radius: 50px;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .search-input:focus {
+      border-color: rgba(168, 85, 247, 0.9);
+      box-shadow: 0 0 35px rgba(168, 85, 247, 0.4);
+      background: rgba(15, 10, 45, 0.8);
+    }
+
+    .search-input::placeholder {
+      color: #9090b0;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.8rem;
+      color: #a78bfa;
+      pointer-events: none;
+    }
+
+    /* Commands Container */
+    .commands-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 60px 160px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .category-section {
+      margin-bottom: 160px;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 50px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .category-icon {
+      font-size: 4rem;
+    }
+
+    .category-info {
+      flex: 1;
+    }
+
+    .category-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.2rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #c084fc, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(168,85,247,0.5);
+    }
+
+    .category-description {
+      font-size: 1.2rem;
+      color: #b0b0ff;
+    }
+
+    .commands-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .command-card {
+      background: rgba(15, 10, 45, 0.65);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 24px;
+      padding: 35px 40px;
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: flex-start;
+      gap: 30px;
+      opacity: 0;
+      transform: translateY(80px);
+    }
+
+    .command-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .command-card:hover {
+      transform: translateY(-12px);
+      border-color: rgba(168,85,247,0.85);
+      box-shadow: 0 25px 70px rgba(168,85,247,0.45);
+    }
+
+    .command-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(168,85,247,0.3), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      border-radius: 24px;
+    }
+
+    .command-card:hover::before {
+      opacity: 1;
+    }
+
+    .command-icon {
+      font-size: 3rem;
+      min-width: 60px;
+      text-align: center;
+      background: linear-gradient(135deg, #c084fc, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .command-content {
+      flex: 1;
+    }
+
+    .command-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .command-name {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: rgba(168, 85, 247, 0.18);
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(168, 85, 247, 0.4);
+    }
+
+    .command-badge {
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .badge-premium {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #000;
+    }
+
+    .badge-admin {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+    }
+
+    .command-description {
+      font-size: 1.12rem;
+      color: #d0d0ff;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .command-usage {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 1rem;
+      color: #b0b0d0;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 10px 16px;
+      border-radius: 10px;
+      border-left: 4px solid #a78bfa;
+      display: inline-block;
+    }
+
+    .command-usage-label {
+      color: #a78bfa;
+      margin-right: 10px;
+      font-weight: 500;
+    }
+
+    /* Footer (sama persis) */
+    .footer-section {
+      position: relative;
+      background: rgba(10, 8, 20, 0.95);
+      border-top: 1px solid rgba(168,85,247,0.2);
+      padding: 80px 60px 40px;
+      margin-top: 140px;
+      z-index: 10;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-logo-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 2px solid rgba(168,85,247,0.3);
+      box-shadow: 0 0 20px rgba(168,85,247,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #7c3aed, #c084fc);
+      color: white;
+    }
+
+    .footer-brand-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .footer-brand-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+
+    .footer-brand-tagline {
+      font-size: 1rem;
+      color: #9090b0;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-stats {
+      display: flex;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .footer-stat {
+      text-align: center;
+    }
+
+    .footer-stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .footer-stat-label {
+      font-size: 0.95rem;
+      color: #9090b0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .footer-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent);
+      margin: 60px 0;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      gap: 100px;
+      margin-bottom: 60px;
+      max-width: 900px;
+    }
+
+    .footer-column {
+      flex: 1;
+    }
+
+    .footer-heading {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .footer-links li a {
+      color: #b0b0d0;
+      text-decoration: none;
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .footer-links li a:hover {
+      color: #ffffff;
+      transform: translateX(5px);
+      text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 40px;
+      border-top: 1px solid rgba(168,85,247,0.15);
+    }
+
+    .footer-copyright {
+      font-size: 1rem;
+      color: #8080a0;
+    }
+
+    .footer-socials {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .footer-social-link {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(168,85,247,0.1);
+      border: 1px solid rgba(168,85,247,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #b0b0d0;
+      transition: all 0.35s ease;
+      text-decoration: none;
+    }
+
+    .footer-social-link:hover {
+      background: rgba(168,85,247,0.25);
+      border-color: rgba(168,85,247,0.6);
+      color: #ffffff;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(168,85,247,0.4);
+    }
+
+    .footer-social-link svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-title { font-size: 4.5rem; }
+      .hero-section { padding: 160px 40px 80px; }
+      .commands-container { padding: 0 40px 120px; }
+      .category-title { font-size: 2.8rem; }
+      .footer-top { flex-direction: column; gap: 40px; text-align: center; }
+      .footer-stats { gap: 40px; justify-content: center; }
+      .footer-content { flex-direction: column; gap: 50px; }
+      .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 25px; flex-wrap: wrap; height: auto; }
+      .nav-menu { flex-wrap: wrap; gap: 25px; justify-content: center; margin: 15px 0; }
+      .nav-actions { margin: 10px auto; }
+      .hero-title { font-size: 3.8rem; letter-spacing: 4px; }
+      .commands-grid { gap: 20px; }
+      .command-card { flex-direction: column; gap: 20px; padding: 30px 25px; }
+      .command-icon { min-width: auto; text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="loader-logo">TEST BOT</div>
+    <div class="loader-text">LOADING COMMANDS...</div>
+    <div class="loader-bar">
+      <div class="loader-progress"></div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">TEST BOT</a>
+
+    <div class="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="fitur.html">Fitur</a>
+      <a href="command.html" class="active">Command</a>
+      <a href="support.html">Support</a>
+      <a href="premium.html">Premium</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="premium.html" class="btn-action btn-premium">Premium</a>
+      <a href="support.html" class="btn-action btn-support">Support</a>
+    </div>
+  </nav>
+
+  <div class="stars" id="stars"></div>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <h1 class="hero-title">COMMAND LIST</h1>
+    <p class="hero-subtitle">
+      Daftar lengkap command yang tersedia di TEST BOT. Prefix default: <strong>!</strong><br>
+      Gunakan search di bawah untuk menemukan command dengan cepat.
+    </p>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          class="search-input" 
+          id="searchInput"
+          placeholder="Cari command... (contoh: play, ban, rank, slots)"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Commands Container -->
+  <div class="commands-container">
+    
+    <!-- Moderation -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-icon">🛡️</span>
+        <div class="category-info">
+          <h2 class="category-title">Moderation</h2>
+          <p class="category-description">Command untuk menjaga keamanan dan ketertiban server</p>
+        </div>
+      </div>
+      <div class="commands-grid">
+        <div class="command-card">
+          <span class="command-icon">🔨</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!ban</span>
+              <span class="command-badge badge-admin">ADMIN</span>
+            </div>
+            <p class="command-description">Ban member dari server beserta alasan opsional</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !ban @user [reason]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">👢</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!kick</span>
+              <span class="command-badge badge-admin">ADMIN</span>
+            </div>
+            <p class="command-description">Kick member dari server</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !kick @user [reason]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🔇</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!mute</span>
+              <span class="command-badge badge-admin">ADMIN</span>
+            </div>
+            <p class="command-description">Mute member untuk durasi tertentu</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !mute @user [time] [reason]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">⚠️</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!warn</span>
+              <span class="command-badge badge-admin">ADMIN</span>
+            </div>
+            <p class="command-description">Berikan warning kepada member</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !warn @user [reason]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🧹</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!clear</span>
+              <span class="command-badge badge-admin">ADMIN</span>
+            </div>
+            <p class="command-description">Hapus sejumlah pesan di channel</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !clear [amount]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-icon">🎵</span>
+        <div class="category-info">
+          <h2 class="category-title">Music</h2>
+          <p class="category-description">Command untuk mengontrol music player 24/7</p>
+        </div>
+      </div>
+      <div class="commands-grid">
+        <div class="command-card">
+          <span class="command-icon">▶️</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!play</span>
+            </div>
+            <p class="command-description">Putar lagu dari YouTube, Spotify, atau SoundCloud</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !play [nama lagu / URL]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">⏸️</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!pause</span>
+            </div>
+            <p class="command-description">Jeda lagu yang sedang diputar</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !pause
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">⏭️</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!skip</span>
+            </div>
+            <p class="command-description">Lewati ke lagu berikutnya</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !skip
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">📜</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!queue</span>
+            </div>
+            <p class="command-description">Lihat antrian lagu saat ini</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !queue
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🔊</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!volume</span>
+            </div>
+            <p class="command-description">Atur volume pemutaran (0-100)</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !volume [0-100]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level & Economy -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-icon">⭐</span>
+        <div class="category-info">
+          <h2 class="category-title">Level & Economy</h2>
+          <p class="category-description">Command untuk sistem level dan ekonomi virtual</p>
+        </div>
+      </div>
+      <div class="commands-grid">
+        <div class="command-card">
+          <span class="command-icon">📊</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!rank</span>
+            </div>
+            <p class="command-description">Tampilkan rank card dan progress level</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !rank [@user]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🏆</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!leaderboard</span>
+            </div>
+            <p class="command-description">Lihat ranking level server</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !leaderboard
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">💰</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!balance</span>
+            </div>
+            <p class="command-description">Cek saldo ekonomi kamu</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !balance [@user]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">💼</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!work</span>
+            </div>
+            <p class="command-description">Kerja untuk mendapatkan uang virtual</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !work
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🎁</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!daily</span>
+            </div>
+            <p class="command-description">Ambil hadiah harian</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !daily
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🛒</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!shop</span>
+            </div>
+            <p class="command-description">Buka toko untuk membeli item custom</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !shop
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fun & Games -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-icon">🎮</span>
+        <div class="category-info">
+          <h2 class="category-title">Fun & Games</h2>
+          <p class="category-description">Command hiburan dan mini games</p>
+        </div>
+      </div>
+      <div class="commands-grid">
+        <div class="command-card">
+          <span class="command-icon">🎲</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!roll</span>
+            </div>
+            <p class="command-description">Lempar dadu dengan jumlah sisi custom</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !roll [sisi]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🎰</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!slots</span>
+            </div>
+            <p class="command-description">Main mesin slot dengan taruhan</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !slots [jumlah]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🪙</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!coinflip</span>
+            </div>
+            <p class="command-description">Lempar koin dengan taruhan</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !coinflip [heads/tails] [jumlah]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">❓</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!trivia</span>
+            </div>
+            <p class="command-description">Main kuis pengetahuan umum</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !trivia
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🎯</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!rps</span>
+            </div>
+            <p class="command-description">Main batu-gunting-kertas melawan bot</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !rps [rock/paper/scissors]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Utility -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-icon">⚙️</span>
+        <div class="category-info">
+          <h2 class="category-title">Utility</h2>
+          <p class="category-description">Command utilitas dan informasi</p>
+        </div>
+      </div>
+      <div class="commands-grid">
+        <div class="command-card">
+          <span class="command-icon">ℹ️</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!userinfo</span>
+            </div>
+            <p class="command-description">Lihat detail informasi user</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !userinfo [@user]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🏠</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!serverinfo</span>
+            </div>
+            <p class="command-description">Informasi lengkap tentang server</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !serverinfo
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🔔</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!reminder</span>
+            </div>
+            <p class="command-description">Atur pengingat pribadi atau server</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !reminder [waktu] [pesan]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🗳️</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!poll</span>
+            </div>
+            <p class="command-description">Buat polling interaktif</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !poll [pertanyaan] [opsi1] [opsi2]...
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">📢</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!announce</span>
+              <span class="command-badge badge-admin">ADMIN</span>
+            </div>
+            <p class="command-description">Buat pengumuman dengan embed</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !announce [channel] [pesan]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">🎫</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!ticket</span>
+            </div>
+            <p class="command-description">Buat ticket support pribadi</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !ticket [alasan]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium -->
+    <div class="category-section">
+      <div class="category-header">
+        <span class="category-icon">👑</span>
+        <div class="category-info">
+          <h2 class="category-title">Premium</h2>
+          <p class="category-description">Command eksklusif untuk pengguna premium</p>
+        </div>
+      </div>
+      <div class="commands-grid">
+        <div class="command-card">
+          <span class="command-icon">🎨</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!customrank</span>
+              <span class="command-badge badge-premium">PREMIUM</span>
+            </div>
+            <p class="command-description">Kustomisasi rank card (warna, background, dll)</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !customrank [opsi]
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">💎</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!premiumshop</span>
+              <span class="command-badge badge-premium">PREMIUM</span>
+            </div>
+            <p class="command-description">Akses item eksklusif premium shop</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !premiumshop
+            </div>
+          </div>
+        </div>
+
+        <div class="command-card">
+          <span class="command-icon">⚡</span>
+          <div class="command-content">
+            <div class="command-header">
+              <span class="command-name">!boost</span>
+              <span class="command-badge badge-premium">PREMIUM</span>
+            </div>
+            <p class="command-description">Boost gain XP hingga 2x untuk waktu tertentu</p>
+            <div class="command-usage">
+              <span class="command-usage-label">Usage:</span> !boost [durasi]
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer-section">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo-container">T</div>
+        <div class="footer-brand-info">
+          <h3 class="footer-brand-name">TEST BOT</h3>
+          <p class="footer-brand-tagline">Building Better Discord Communities</p>
+        </div>
+      </div>
+
+      <div class="footer-stats">
+        <div class="footer-stat">
+          <div class="footer-stat-number">--</div>
+          <div class="footer-stat-label">Active Users</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-number">--</div>
+          <div class="footer-stat-label">Players</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-number">--</div>
+          <div class="footer-stat-label">Commands</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="footer-content">
+      <div class="footer-column">
+        <h4 class="footer-heading">TEST BOT</h4>
+        <ul class="footer-links">
+          <li><a href="command.html">Commands</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Team</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Community</h4>
+        <ul class="footer-links">
+          <li><a href="support.html">Support Server</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-links">
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Usage Guidelines</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        © 2026 TEST BOT. All rights reserved
+      </div>
+      <div class="footer-socials">
+        <a href="mailto:contact@testbot.com" class="footer-social-link" aria-label="Email">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
+          </svg>
+        </a>
+        <a href="https://discord.gg/xxxxxxxxxx" class="footer-social-link" aria-label="Discord">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Preloader & navbar animation
+    window.addEventListener('load', () => {
+      document.body.classList.add('loaded');
+
+      const preloader = document.getElementById('preloader');
+      setTimeout(() => {
+        preloader.classList.add('hidden');
+        document.querySelector('.navbar').classList.add('loaded');
+      }, 3800);
+    });
+
+    // Stars & Meteor
+    function createStars() {
+      const container = document.getElementById('stars');
+      for(let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3.5 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.animationDelay = Math.random() * 7 + 's';
+        container.appendChild(star);
+      }
+    }
+
+    function createMeteor() {
+      const meteor = document.createElement('div');
+      meteor.className = 'meteor';
+      const startX = 80 + Math.random() * 20;
+      const startY = -30 - Math.random() * 40;
+      meteor.style.left = startX + 'vw';
+      meteor.style.top  = startY + 'vh';
+      const duration = 3.8 + Math.random() * 4.2;
+      meteor.style.animationDuration = duration + 's';
+      const rot = 42 + Math.random() * 18;
+      meteor.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+      document.body.appendChild(meteor);
+      setTimeout(() => meteor.remove(), duration * 1000 + 2500);
+    }
+
+    createStars();
+    setInterval(createMeteor, 800 + Math.random() * 1200);
+    for(let i = 0; i < 8; i++) {
+      setTimeout(createMeteor, i * 400 + Math.random() * 800);
+    }
+
+    // Command card animation on scroll
+    const cards = document.querySelectorAll('.command-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    cards.forEach(card => observer.observe(card));
+
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const commandCards = document.querySelectorAll('.command-card');
+
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+      
+      commandCards.forEach(card => {
+        const commandName = card.querySelector('.command-name').textContent.toLowerCase();
+        const commandDesc = card.querySelector('.command-description').textContent.toLowerCase();
+        const usage = card.querySelector('.command-usage')?.textContent.toLowerCase() || '';
+        
+        if (commandName.includes(searchTerm) || commandDesc.includes(searchTerm) || usage.includes(searchTerm)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
