@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Team • YURI BOT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh;background:#000;
+      font-family:'Roboto',system-ui,sans-serif;
+      overflow-x:hidden;color:#fff;
+      opacity:0;transition:opacity 1.2s ease;
+      position:relative;
+    }
+    body.loaded{opacity:1}
+
+    /* Preloader */
+    #preloader{
+      position:fixed;inset:0;background:#000;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      z-index:9999;transition:opacity 1s ease, visibility 1s ease;
+    }
+    #preloader.hidden{opacity:0;visibility:hidden}
+    .loader-logo{
+      font-family:'Orbitron',sans-serif;font-size:5.2rem;font-weight:900;
+      background:linear-gradient(90deg,#00f0ff,#00aaff,#0066ff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      text-shadow:0 0 30px rgba(0,240,255,.7);
+      animation:pulse 2s infinite alternate;margin-bottom:18px;
+    }
+    @keyframes pulse{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.08);opacity:1}}
+    .loader-text{font-size:1.25rem;color:#a78bfa;letter-spacing:3px;margin-bottom:22px}
+    .loader-bar{width:280px;height:6px;background:rgba(168,139,250,.2);border-radius:3px;overflow:hidden}
+    .loader-progress{width:0;height:100%;background:linear-gradient(90deg,#a78bfa,#c084fc);animation:loading 3.2s ease-in-out forwards}
+    @keyframes loading{0%{width:0}100%{width:100%}}
+
+    /* Stars & Meteor */
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 16px rgba(255,255,255,0.4);
+      animation: twinkle 6s infinite alternate;
+      opacity: 0.9;
+    }
+
+    @keyframes twinkle {
+      0%,100% { opacity: 0.5; transform: scale(0.8); }
+      50%     { opacity: 1;   transform: scale(1.2); }
+    }
+
+    .meteor {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 20px 8px rgba(255,255,255,0.95),
+        0 0 50px 15px rgba(255,255,255,0.7),
+        0 0 90px 30px rgba(255,255,255,0.4);
+      transform: translate(-50%, -50%) rotate(45deg);
+      pointer-events: none;
+      animation: meteor linear forwards;
+    }
+
+    .meteor::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -220px;
+      width: 220px;
+      height: 3.5px;
+      background: linear-gradient(to left, transparent, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+      transform: translateY(-50%);
+      opacity: 0.9;
+      filter: blur(1.8px);
+    }
+
+    .meteor::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -300px;
+      width: 300px;
+      height: 2.5px;
+      background: linear-gradient(to left, transparent, rgba(255,255,255,0.5));
+      transform: translateY(-50%);
+      opacity: 0.6;
+      filter: blur(4px);
+    }
+
+    @keyframes meteor {
+      0% { transform: translate(-50%, -50%) translate(0, 0) rotate(45deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) translate(-1200px, 1200px) rotate(45deg); opacity: 0; }
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: rgba(5, 5, 15, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(120, 100, 255, 0.12);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 50px;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.8s ease 3.5s;
+    }
+
+    .navbar.loaded { opacity: 1; transform: translateY(0); }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.9rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #c084fc, #7c3aed, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px rgba(168, 85, 247, 0.6);
+      letter-spacing: 3px;
+      text-decoration: none;
+    }
+
+    .nav-menu { display: flex; gap: 50px; align-items: center; }
+
+    .nav-menu a {
+      color: #d0d0ff;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-menu a:hover { color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -8px;
+      left: 0;
+      background: linear-gradient(90deg, #c084fc, #a78bfa);
+      transition: width 0.4s ease;
+    }
+
+    .nav-menu a:hover::after { width: 100%; }
+
+    .nav-actions { display: flex; gap: 20px; }
+
+    .btn-action {
+      padding: 10px 28px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-premium {
+      background: linear-gradient(135deg, #7c3aed, #c084fc);
+      color: white;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-premium:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 35px rgba(168, 85, 247, 0.8);
+    }
+
+    .btn-support {
+      background: transparent;
+      color: #d0d0ff;
+      border: 1px solid rgba(168, 85, 247, 0.5);
+    }
+
+    .btn-support:hover {
+      background: rgba(168, 85, 247, 0.12);
+      color: white;
+      border-color: #c084fc;
+    }
+
+    /* Dropdown */
+    .nav-dropdown{ position: relative; display: flex; align-items: center; }
+
+    .nav-dropbtn{
+      background: transparent;
+      border: none;
+      color: #d0d0ff;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-dropbtn:hover{ color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+
+    .nav-dropbtn::after{
+      content:'';
+      position:absolute;
+      width:0;
+      height:2px;
+      bottom:-8px;
+      left:0;
+      background: linear-gradient(90deg, #c084fc, #a78bfa);
+      transition: width 0.4s ease;
+    }
+
+    .nav-dropdown:hover .nav-dropbtn::after{ width:100%; }
+
+    .dropdown-panel{
+      position: absolute;
+      top: calc(100% + 18px);
+      left: 0;
+      width: 340px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(10, 10, 18, 0.92);
+      border: 1px solid rgba(168, 85, 247, 0.20);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.70);
+      backdrop-filter: blur(14px);
+      transform: translateY(-10px);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+      z-index: 2000;
+    }
+
+    .nav-dropdown.open .dropdown-panel{
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .dropdown-item{
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .dropdown-item:hover{
+      background: rgba(168, 85, 247, 0.10);
+      border: 1px solid rgba(168, 85, 247, 0.18);
+    }
+
+    .dropdown-ico{
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(168, 85, 247, 0.12);
+      border: 1px solid rgba(168, 85, 247, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #fff;
+      flex: 0 0 auto;
+    }
+
+    .dropdown-text{ display: flex; flex-direction: column; gap: 3px; }
+    .dropdown-title{ font-weight: 700; color: #eaeaff; font-size: 1.05rem; }
+    .dropdown-sub{ color: #9aa0c6; font-size: 0.92rem; }
+
+    /* Header Section */
+    .hero-section {
+      position: relative;
+      padding: 160px 40px 80px;
+      text-align: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .hero-logo-container {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      border-radius: 28px;
+      overflow: hidden;
+      border: 3px solid rgba(168,85,247,0.4);
+      box-shadow: 0 0 40px rgba(168,85,247,0.5);
+      background: rgba(15,10,45,.65);
+    }
+
+    .hero-logo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-brand-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #c084fc, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      text-shadow: 0 0 35px rgba(168,85,247,0.5);
+    }
+
+    .hero-tagline {
+      font-size: 1.4rem;
+      color: #b0b0ff;
+      margin-bottom: 60px;
+      letter-spacing: 1px;
+    }
+
+    /* Stats Bar */
+    .stats-container {
+      max-width: 900px;
+      margin: 0 auto 100px;
+      background: rgba(15, 10, 45, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(168,85,247,0.35);
+      border-radius: 16px;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+
+    .stat-box {
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #9090b0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Layout */
+    .page{
+      padding: 40px 40px 90px;
+      max-width:1650px;
+      margin:0 auto;
+    }
+
+    .page-title{
+      font-family:'Orbitron',sans-serif;
+      font-size:3.4rem;
+      background:linear-gradient(90deg,#a78bfa,#c084fc,#7c3aed);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      text-shadow:0 0 35px rgba(168,85,247,.5);
+      margin-bottom:14px;
+      letter-spacing:2px;
+      text-align:center;
+    }
+    .page-sub{
+      text-align:center;
+      color:#b0b0ff;
+      font-size:1.15rem;
+      margin-bottom:55px;
+    }
+
+    /* CEO CARD */
+    .hero-card{
+      width:100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      background:rgba(15,10,45,.65);
+      border:1px solid rgba(168,85,247,.35);
+      border-radius:32px;
+      box-shadow:0 30px 90px rgba(0,0,0,.8);
+      backdrop-filter: blur(18px);
+      padding:60px;
+      display:grid;
+      grid-template-columns: 550px 1fr;
+      gap:60px;
+      overflow:hidden;
+      position:relative;
+      transform:translateY(40px);
+      opacity:0;
+      transition:all .9s cubic-bezier(.22,1,.36,1);
+    }
+    .hero-card.visible{transform:translateY(0);opacity:1}
+    .hero-card::before{
+      content:'';
+      position:absolute;inset:-100px;
+      background:radial-gradient(circle at 40% 35%, rgba(168,85,247,.35), transparent 60%);
+      opacity:.85;
+      pointer-events:none;
+    }
+
+    .hero-photo{
+      position:relative;
+      width:100%;
+      border-radius:28px;
+      overflow:hidden;
+      border:3px solid rgba(255,255,255,.16);
+      box-shadow:0 30px 80px rgba(0,0,0,.60);
+      background:rgba(0,0,0,.25);
+      aspect-ratio: 1 / 1;
+    }
+    .hero-photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .hero-info{position:relative;z-index:1;display:flex;flex-direction:column;gap:24px}
+    .hero-name{
+      font-family:'Orbitron',sans-serif;
+      font-size:4rem;
+      letter-spacing:3px;
+      color:#fff;
+      text-shadow:0 0 25px rgba(255,255,255,.20);
+    }
+    .hero-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:14px;
+      padding:14px 24px;
+      border-radius:999px;
+      width:max-content;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:#eaeaff;
+      font-weight:700;
+      font-size:1.2rem;
+    }
+    .hero-desc{
+      color:#cfcfff;
+      line-height:1.9;
+      max-width:850px;
+      font-size:1.3rem;
+    }
+
+    .chips{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px}
+    .chip{
+      padding:14px 22px;
+      border-radius:999px;
+      background:rgba(168,85,247,.10);
+      border:1px solid rgba(168,85,247,.20);
+      color:#eaeaff;
+      font-weight:700;
+      font-size:1.1rem;
+      box-shadow:0 0 22px rgba(168,85,247,.14);
+    }
+
+    .hero-bottom{
+      display:flex;
+      gap:24px;
+      align-items:center;
+      margin-top:20px;
+      flex-wrap:wrap;
+    }
+    .loc{
+      display:flex;align-items:center;gap:14px;
+      color:#aab0e6;
+      font-weight:600;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      padding:14px 22px;
+      border-radius:999px;
+      font-size:1.15rem;
+    }
+    .cta{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
+      padding:16px 30px;
+      border-radius:16px;
+      text-decoration:none;
+      color:#fff;
+      background:linear-gradient(135deg,#2f6fff,#7c3aed);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 0 30px rgba(70,120,255,.35);
+      font-weight:800;
+      font-size:1.15rem;
+      transition:all .35s ease;
+    }
+    .cta:hover{transform:translateY(-3px);box-shadow:0 0 50px rgba(124,58,237,.60)}
+
+    /* STAFF GRID */
+    .section-title{
+      margin-top:70px;
+      font-family:'Orbitron',sans-serif;
+      font-size:2.2rem;
+      background:linear-gradient(90deg,#ffffff,#e0e0ff,#ffffff);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      text-shadow:0 0 20px rgba(255,255,255,.22);
+      letter-spacing:2px;
+      text-align:left;
+    }
+    .section-sub{color:#b0b0ff;margin-top:10px;margin-bottom:26px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap:18px;
+    }
+
+    /* CARD */
+    .card{
+      background:rgba(15,10,45,.58);
+      border:1px solid rgba(168,85,247,.28);
+      border-radius:18px;
+      box-shadow:0 14px 45px rgba(0,0,0,.65);
+      backdrop-filter: blur(18px);
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+      transform:translateY(18px) scale(0.95);
+      opacity:0;
+      transition: all .7s cubic-bezier(.22,1,.36,1);
+      min-height: 240px;
+      cursor:pointer;
+    }
+    
+    .card.visible{
+      transform:translateY(0) scale(1);
+      opacity:1;
+      animation: cardPop 0.6s cubic-bezier(.22,1,.36,1);
+    }
+    
+    @keyframes cardPop{
+      0%{
+        transform:translateY(18px) scale(0.95);
+        opacity:0;
+      }
+      60%{
+        transform:translateY(-5px) scale(1.02);
+      }
+      100%{
+        transform:translateY(0) scale(1);
+        opacity:1;
+      }
+    }
+    
+    .card::before{
+      content:'';
+      position:absolute;
+      inset:-80px;
+      background:radial-gradient(circle at 35% 25%, rgba(168,85,247,.25), transparent 60%);
+      opacity:.75;
+      pointer-events:none;
+      transition: all .5s ease;
+    }
+    
+    .card::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:18px;
+      padding:2px;
+      background:linear-gradient(135deg, 
+        rgba(168,85,247,0), 
+        rgba(168,85,247,.6), 
+        rgba(192,132,252,.8),
+        rgba(168,85,247,.6),
+        rgba(168,85,247,0)
+      );
+      background-size:300% 300%;
+      -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity:0;
+      transition: all .4s ease;
+    }
+    
+    .card:hover{
+      border-color:rgba(168,85,247,.85);
+      box-shadow:
+        0 30px 80px rgba(168,85,247,.35),
+        0 0 60px rgba(168,85,247,.25),
+        inset 0 0 40px rgba(168,85,247,.08);
+      transform:translateY(-12px) scale(1.03);
+    }
+    
+    .card:hover::before{
+      opacity:1;
+      background:radial-gradient(circle at 35% 25%, rgba(168,85,247,.45), transparent 60%);
+    }
+    
+    .card:hover::after{
+      opacity:1;
+      animation: borderGlow 2s linear infinite;
+    }
+    
+    @keyframes borderGlow{
+      0%{
+        background-position:0% 50%;
+      }
+      50%{
+        background-position:100% 50%;
+      }
+      100%{
+        background-position:0% 50%;
+      }
+    }
+    
+    .card:active{
+      transform:translateY(-8px) scale(1.01);
+      transition: all .15s ease;
+    }
+
+    .pp{
+      width:78px;height:78px;border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06);
+      box-shadow:0 0 25px rgba(168,85,247,.22);
+      display:flex;align-items:center;justify-content:center;
+      position:relative;z-index:1;
+      transition: all .4s ease;
+    }
+    
+    .card:hover .pp{
+      box-shadow:0 0 40px rgba(168,85,247,.5);
+      transform: scale(1.05);
+    }
+    
+    .pp img{width:100%;height:100%;object-fit:cover;display:block}
+    .pp-initial{
+      font-family:'Orbitron',sans-serif;
+      font-weight:900;
+      font-size:1.7rem;
+      background:linear-gradient(90deg,#a78bfa,#c084fc);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      text-shadow:0 0 18px rgba(168,85,247,.35);
+    }
+
+    .name{
+      margin-top:14px;
+      font-weight:900;
+      font-size:1.2rem;
+      color:#fff;
+      position:relative;z-index:1;
+    }
+    .role{
+      margin-top:6px;
+      color:#b8b8ff;
+      font-weight:700;
+      font-size:.98rem;
+      position:relative;z-index:1;
+    }
+    .desc{
+      margin-top:12px;
+      color:#cfcfff;
+      line-height:1.55;
+      font-size:.98rem;
+      position:relative;z-index:1;
+      min-height: 72px;
+    }
+
+    .card-btn{
+      margin-top:14px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      width:100%;
+      padding:12px 14px;
+      border-radius:12px;
+      text-decoration:none;
+      color:#fff;
+      font-weight:900;
+      background:linear-gradient(135deg,#7c3aed,#c084fc);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 0 22px rgba(168,85,247,.25);
+      transition:all .35s ease;
+      position:relative;z-index:1;
+    }
+    .card-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 0 40px rgba(168,85,247,.45);
+    }
+
+    /* TOTAL TEAM BADGE */
+    .total-team-badge {
+      display: flex;
+      justify-content: center;
+      margin: 50px 0 30px;
+    }
+
+    .team-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px;
+      background: rgba(15,10,45,.75);
+      border: 1px solid rgba(168,85,247,.35);
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 40px rgba(0,0,0,.6);
+      font-size: 1.15rem;
+      color: #e0e0ff;
+      font-weight: 700;
+    }
+
+    .team-badge-icon {
+      font-size: 1.5rem;
+    }
+
+    /* COMMUNITY JOIN SECTION */
+    .community-join-section {
+      margin: 60px auto 0;
+      max-width: 1100px;
+      background: rgba(15,10,45,.65);
+      border: 1px solid rgba(168,85,247,.35);
+      border-radius: 32px;
+      box-shadow: 0 30px 90px rgba(0,0,0,.8);
+      backdrop-filter: blur(18px);
+      padding: 60px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .community-join-section::before {
+      content: '';
+      position: absolute;
+      inset: -100px;
+      background: radial-gradient(circle at 50% 50%, rgba(168,85,247,.3), transparent 70%);
+      opacity: .85;
+      pointer-events: none;
+    }
+
+    .community-join-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .community-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: #ffffff;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+      line-height: 1.3;
+    }
+
+    .community-description {
+      color: #b0b0d0;
+      font-size: 1.15rem;
+      line-height: 1.8;
+      max-width: 750px;
+      margin: 0 auto 40px;
+    }
+
+    .community-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-community {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 36px;
+      border-radius: 16px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 1.1rem;
+      transition: all .35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-community::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.1);
+      transform: translateX(-100%);
+      transition: transform .4s ease;
+    }
+
+    .btn-community:hover::before {
+      transform: translateX(100%);
+    }
+
+    .btn-discord-primary {
+      background: linear-gradient(135deg, #5865F2, #7c3aed);
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 0 30px rgba(88,101,242,.4);
+    }
+
+    .btn-discord-primary:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 50px rgba(88,101,242,.6);
+    }
+
+    .btn-support-secondary {
+      background: transparent;
+      color: #e0e0ff;
+      border: 2px solid rgba(168,85,247,.5);
+      box-shadow: 0 0 20px rgba(168,85,247,.2);
+    }
+
+    .btn-support-secondary:hover {
+      background: rgba(168,85,247,.12);
+      border-color: #a78bfa;
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(168,85,247,.4);
+    }
+
+    .btn-icon {
+      font-size: 1.3rem;
+    }
+
+    /* === FOOTER SECTION === */
+    .footer-section {
+      position: relative;
+      background: rgba(10, 8, 20, 0.95);
+      border-top: 1px solid rgba(168,85,247,0.2);
+      padding: 80px 60px 40px;
+      margin-top: 120px;
+      z-index: 10;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand { display: flex; align-items: center; gap: 20px; }
+
+    .footer-logo-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 2px solid rgba(168,85,247,0.3);
+      box-shadow: 0 0 20px rgba(168,85,247,0.3);
+    }
+
+    .footer-logo-img { width: 100%; height: 100%; object-fit: cover; }
+
+    .footer-brand-info { display: flex; flex-direction: column; gap: 8px; }
+
+    .footer-brand-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, #a78bfa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 2px;
+    }
+
+    .footer-brand-tagline { font-size: 1rem; color: #9090b0; letter-spacing: 0.5px; }
+
+    .footer-stats { display: flex; gap: 60px; align-items: center; }
+    .footer-stat { text-align: center; }
+
+    .footer-stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 8px;
+    }
+
+    .footer-stat-label {
+      font-size: 0.95rem;
+      color: #9090b0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .footer-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent);
+      margin: 60px 0;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      gap: 100px;
+      margin-bottom: 60px;
+      max-width: 900px;
+    }
+
+    .footer-column { flex: 1; }
+
+    .footer-heading {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .footer-links li a {
+      color: #b0b0d0;
+      text-decoration: none;
+      font-size: 1.05rem;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .footer-links li a:hover {
+      color: #ffffff;
+      transform: translateX(5px);
+      text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 40px;
+      border-top: 1px solid rgba(168,85,247,0.15);
+    }
+
+    .footer-copyright { font-size: 1rem; color: #8080a0; }
+
+    .footer-socials { display: flex; gap: 20px; align-items: center; }
+
+    .footer-social-link {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(168,85,247,0.1);
+      border: 1px solid rgba(168,85,247,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #b0b0d0;
+      transition: all 0.35s ease;
+      text-decoration: none;
+    }
+
+    .footer-social-link:hover {
+      background: rgba(168,85,247,0.25);
+      border-color: rgba(168,85,247,0.6);
+      color: #ffffff;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(168,85,247,0.4);
+    }
+
+    .footer-social-link svg { width: 22px; height: 22px; }
+
+    /* Responsive */
+    @media (max-width: 1400px){
+      .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .hero-card{grid-template-columns: 450px 1fr;gap:50px;padding:50px}
+      .hero-name{font-size:3.5rem}
+    }
+    @media (max-width: 1024px){
+      .hero-card{grid-template-columns:1fr;gap:30px;padding:40px}
+      .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .page{padding:40px 18px 70px}
+      .navbar{padding:0 18px}
+      .nav-menu{gap:20px;flex-wrap:wrap}
+      .footer-top { flex-direction: column; gap: 40px; text-align: center; }
+      .footer-brand { flex-direction: column; }
+      .footer-stats { gap: 40px; }
+      .footer-content { flex-direction: column; gap: 40px; }
+      .footer-bottom { flex-direction: column; gap: 25px; text-align: center; }
+      .stats-container{flex-direction:column;gap:20px}
+      .hero-name{font-size:3rem}
+      .community-join-section{padding:50px 40px}
+      .community-title{font-size:2.2rem}
+    }
+    @media (max-width: 768px){
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .hero-name{font-size:2.5rem}
+      .hero-desc{font-size:1.1rem}
+      .nav-menu{display:none}
+    }
+    @media (max-width: 640px){
+      .grid{grid-template-columns:1fr}
+      .page-title{font-size:2.6rem}
+      .hero-name{font-size:2.1rem}
+      .hero-brand-name{font-size:2.5rem}
+      .footer-section{padding:40px 20px 20px}
+      .hero-card{padding:25px}
+      .hero-desc{font-size:1rem}
+      .community-join-section{padding:40px 25px}
+      .community-title{font-size:1.8rem}
+      .community-buttons{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+
+  <div id="preloader">
+    <div class="loader-logo">YURI BOT</div>
+    <div class="loader-text">LOADING TEAM PAGE...</div>
+    <div class="loader-bar"><div class="loader-progress"></div></div>
+  </div>
+
+  <div class="stars" id="stars"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">YURI BOT</a>
+
+    <div class="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="fitur.html">Fitur</a>
+      <a href="command.html">Command</a>
+      <a href="support.html">Support</a>
+      <a href="premium.html">Premium</a>
+
+      <div class="nav-dropdown" id="resourcesDropdown">
+        <button class="nav-dropbtn" type="button">
+          Sumber Daya <span class="nav-caret">▾</span>
+        </button>
+
+        <div class="dropdown-panel">
+          <a class="dropdown-item" href="team.html">
+            <span class="dropdown-ico">👥</span>
+            <span class="dropdown-text">
+              <span class="dropdown-title">Team</span>
+              <span class="dropdown-sub">Kenali tim kami</span>
+            </span>
+          </a>
+
+          <a class="dropdown-item" href="tos.html">
+            <span class="dropdown-ico">📜</span>
+            <span class="dropdown-text">
+              <span class="dropdown-title">TOS</span>
+              <span class="dropdown-sub">Syarat & ketentuan</span>
+            </span>
+          </a>
+
+          <a class="dropdown-item" href="privacy.html">
+            <span class="dropdown-ico">🔒</span>
+            <span class="dropdown-text">
+              <span class="dropdown-title">Privacy Policy</span>
+              <span class="dropdown-sub">Privasi & data</span>
+            </span>
+          </a>
+
+          <a class="dropdown-item" href="dokumentasi.html">
+            <span class="dropdown-ico">📚</span>
+            <span class="dropdown-text">
+              <span class="dropdown-title">Dokumentasi</span>
+              <span class="dropdown-sub">Belajar & tutorial</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <a href="premium.html" class="btn-action btn-premium">Premium</a>
+      <a href="support.html" class="btn-action btn-support">Support</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-logo-container">
+      <img src="pp.jpg" alt="YURI BOT Logo">
+    </div>
+    <h1 class="hero-brand-name">YURI BOT</h1>
+    <p class="hero-tagline">Building Better Discord Communities</p>
+
+    <!-- Stats Bar -->
+    <div class="stats-container">
+      <div class="stat-box">
+        <div class="stat-label">Active Users</div>
+        <div class="stat-value">--</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Players</div>
+        <div class="stat-value">--</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Commands</div>
+        <div class="stat-value">--</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="page">
+    <h2 class="page-title">TEAM</h2>
+    <p class="page-sub">Kenali orang-orang di balik <b>YURI BOT</b>.</p>
+
+    <!-- CEO Card -->
+    <section class="hero-card" id="ceoCard">
+      <div class="hero-photo">
+        <img src="ace founder.jpg" alt="CEO">
+      </div>
+
+      <div class="hero-info">
+        <div class="hero-name" id="ceoName">Foryou.4xx</div>
+        <div class="hero-badge">👤 Founder & Developer</div>
+
+        <div class="hero-desc" id="ceoDesc">
+          Pemimpin visioner yang mendorong misi YURI BOT untuk memberikan pengalaman Discord yang aman, seru,
+          dan powerful. Dengan passion untuk inovasi, tim kami konsisten melampaui standar industri.
+        </div>
+
+        <div class="chips">
+          <div class="chip">Founder Foryou Community</div>
+          <div class="chip">Founder Foryou Store</div>
+          <div class="chip">Founder YURI BOT</div>
+          <div class="chip">5+ Tahun Belajar Teknologi</div>
+        </div>
+
+        <div class="hero-bottom">
+          <div class="loc">📍 Jawa Barat, Indonesia</div>
+          <a class="cta" href="https://linktr.ee/foryou.4x" target="_blank" id="ceoLink">🔗 Hubungi</a>
+        </div>
+      </div>
+    </section>
+
+    <h2 class="section-title">STAFF</h2>
+    <p class="section-sub">Total staff aktif yang mendukung komunitas YURI BOT.</p>
+
+    <section class="grid" id="staffGrid"></section>
+
+    <!-- TOTAL TEAM BADGE -->
+    <div class="total-team-badge">
+      <div class="team-badge">
+        <span class="team-badge-icon">👥</span>
+        <span>Total Anggota Tim: <span id="totalStaffValue">27+</span></span>
+      </div>
+    </div>
+
+    <!-- COMMUNITY JOIN SECTION -->
+    <section class="community-join-section">
+      <div class="community-join-content">
+        <h2 class="community-title">Bergabung dengan Komunitas Kami</h2>
+        <p class="community-description">
+          Terhubung dengan tim dan komunitas kami. Rasakan pendekatan kolaboratif dan dukungan profesional kami secara langsung.
+        </p>
+        <div class="community-buttons">
+          <a href="https://discord.gg/foryoucom" target="_blank" class="btn-community btn-discord-primary">
+            <span class="btn-icon">💬</span>
+            <span>Bergabung Komunitas Discord</span>
+          </a>
+          <a href="support.html" class="btn-community btn-support-secondary">
+            <span class="btn-icon">🎧</span>
+            <span>Hubungi Dukungan</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer-section">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo-container">
+          <img src="pp.jpg" alt="YURI BOT Logo" class="footer-logo-img">
+        </div>
+        <div class="footer-brand-info">
+          <h3 class="footer-brand-name">YURI BOT</h3>
+          <p class="footer-brand-tagline">Building Better Discord Communities</p>
+        </div>
+      </div>
+
+      <div class="footer-stats">
+        <div class="footer-stat">
+          <div class="footer-stat-number">--</div>
+          <div class="footer-stat-label">Active Users</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-number">--</div>
+          <div class="footer-stat-label">Players</div>
+        </div>
+        <div class="footer-stat">
+          <div class="footer-stat-number">--</div>
+          <div class="footer-stat-label">Commands</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="footer-content">
+      <div class="footer-column">
+        <h4 class="footer-heading">YURI BOT</h4>
+        <ul class="footer-links">
+          <li><a href="command.html">Commands</a></li>
+          <li><a href="dokumentasi.html">Documentation</a></li>
+          <li><a href="index.html">Changelog</a></li>
+          <li><a href="team.html">Team</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Community</h4>
+        <ul class="footer-links">
+          <li><a href="support.html">Support Server</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-links">
+          <li><a href="tos.html">Terms of Service</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+          <li><a href="dokumentasi.html">Usage Guidelines</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        © 2025 YURI BOT. All rights reserved
+      </div>
+      <div class="footer-socials">
+        <a href="mailto:contact@yuribot.com" class="footer-social-link" aria-label="Email">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
+          </svg>
+        </a>
+        <a href="https://discord.gg/foryoucom" class="footer-social-link" aria-label="Discord">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.791 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Preloader
+    window.addEventListener("load", () => {
+      document.body.classList.add("loaded");
+      setTimeout(() => {
+        document.getElementById("preloader").classList.add("hidden");
+        document.querySelector(".navbar").classList.add("loaded");
+      }, 3400);
+    });
+
+    // Dropdown
+    (() => {
+      const wrap = document.getElementById("resourcesDropdown");
+      if(!wrap) return;
+      const btn = wrap.querySelector(".nav-dropbtn");
+      const open = () => wrap.classList.add("open");
+      const close = () => wrap.classList.remove("open");
+      const toggle = () => wrap.classList.toggle("open");
+      wrap.addEventListener("mouseenter", open);
+      wrap.addEventListener("mouseleave", close);
+      btn.addEventListener("click", (e) => { e.stopPropagation(); toggle(); });
+      document.addEventListener("click", close);
+      document.addEventListener("keydown", (e) => { if(e.key === "Escape") close(); });
+    })();
+
+    // Stars
+    function createStars() {
+      const container = document.getElementById('stars');
+      for(let i = 0; i < 200; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3.5 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.animationDelay = Math.random() * 7 + 's';
+        container.appendChild(star);
+      }
+    }
+
+    // Meteor
+    function createMeteor() {
+      const meteor = document.createElement('div');
+      meteor.className = 'meteor';
+      const startX = 80 + Math.random() * 20;
+      const startY = -30 - Math.random() * 40;
+      meteor.style.left = startX + 'vw';
+      meteor.style.top  = startY + 'vh';
+      const duration = 3.8 + Math.random() * 4.2;
+      meteor.style.animationDuration = duration + 's';
+      const rot = 42 + Math.random() * 18;
+      meteor.style.transform = `translate(-50%, -50%) rotate(${rot}deg)`;
+      document.body.appendChild(meteor);
+      setTimeout(() => meteor.remove(), duration * 1000 + 2500);
+    }
+
+    createStars();
+    setInterval(createMeteor, 600 + Math.random() * 1400);
+    for(let i = 0; i < 10; i++) setTimeout(createMeteor, i * 300 + Math.random() * 600);
+
+    // Reveal animations
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add("visible"); });
+    }, { threshold: 0.12 });
+
+    const ceoCard = document.getElementById("ceoCard");
+    revealObserver.observe(ceoCard);
+
+    // Data Staff (27 staff)
+    const staff = [
+      {name: "Kaizer",role: "Co-Founder", desc: "Pendamping Founder. Membantu Founder dalam mengelola server memberikan masukan strategis, dan turut mengawasi semua staff.", link: "link", ppCustom: true, pp: "kaizer co founder.webp"},
+      {name: "Hikari",role: "Co-Founder", desc: "Pendamping Founder. Membantu Founder dalam mengelola server, memberikan masukan strategis, dan turut mengawasi semua staff.", link: "link", ppCustom: true, pp: "hikari co founder.webp"},
+      {name: "Reyy",role: "Administrator", desc: "Manajemen utama server. Bertugas menjalankan operasional server sehari-hari, mengatur struktur channel, bot, permissions.", link: "link", ppCustom: true, pp: "reyy administrator.jpg"},
+      {name: "Sahrul",role: "Administrator", desc: "Manajemen utama server. Bertugas menjalankan operasional server sehari-hari, mengatur struktur channel, bot, permissions.", link: "link", ppCustom: true, pp: "sahrul administrator.jpg"},
+      {name: "Awin",role: "Administrator", desc: "Manajemen utama server. Bertugas menjalankan operasional server sehari-hari, mengatur struktur channel, bot, permissions.", link: "link", ppCustom: true, pp: "awin administrator.webp"},
+      {name: "Nevin",role: "Administrator", desc: "Manajemen utama server. Bertugas menjalankan operasional server sehari-hari, mengatur struktur channel, bot, permissions.", link: "https://guns.lol/elle.mara", ppCustom: true, pp: "nevin administrator.webp"},
+      {name: "Aru",role: "Developer", desc: "Membangun dan mengelola ekosistem aplikasi, bot, serta integrasi untuk meningkatkan pengalaman pengguna.", link: "link", ppCustom: true, pp: "aru developer.webp"},
+      {name: "Amimir",role: "Co-Developer", desc: "Membangun dan mengelola ekosistem aplikasi, bot, serta integrasi untuk meningkatkan pengalaman pengguna.", link: "link", ppCustom: true, pp: "amimir dev.webp"},
+      {name: "Furina desuwa",role: "Developer", desc: "Membangun dan mengelola ekosistem aplikasi, bot, serta integrasi untuk meningkatkan pengalaman pengguna.", link: "link1", ppCustom: true, pp: "furina desuwa developer.webp"},
+      {name: "Zerobexial",role: "Moderator", desc: "Penjaga ketertiban server. Mengawasi interaksi member di chat & voice agar tetap sesuai aturan.", link: "https://linktr.ee/zerobexial", ppCustom: true, pp: "zerobexial moderator.webp"},
+      {name: "Kyy",role: "Moderator", desc: "Penjaga ketertiban server. Mengawasi interaksi member di chat & voice agar tetap sesuai aturan.", link: "https://guns.lol/fr33d00m__", ppCustom: true, pp: "ky moderator.webp"},
+      {name: "El Perintis",role: "Support", desc: "Tim bantuan teknis & pertanyaan. Menjawab pertanyaan member seputar aturan server dan permasalahan teknis.", link: "link", ppCustom: true, pp: "el perintis support.webp"},
+      {name: "Rin",role: "Support", desc: "Tim bantuan teknis & pertanyaan. Menjawab pertanyaan member seputar aturan server dan permasalahan teknis.", link: "link", ppCustom: true, pp: "rin support.webp"},
+      {name: "Aerox",role: "Support", desc: "Tim bantuan teknis & pertanyaan. Menjawab pertanyaan member seputar aturan server dan permasalahan teknis.", link: "link", ppCustom: true, pp: "aerox support.webp"},
+      {name: "Michi",role: "Event Organizer", desc: "Perancang dan pelaksana event. Bertugas membuat, mengatur, dan menjalankan event di server.", link: "link", ppCustom: true, pp: "michi eo.jpeg"},
+      {name: "Zenst",role: "Event Organizer", desc: "Perancang dan pelaksana event. Bertugas membuat, mengatur, dan menjalankan event di server.", link: "link", ppCustom: true, pp: "zenst eo.webp"},
+      {name: "Aeva",role: "Event Organizer", desc: "Perancang dan pelaksana event. Bertugas membuat, mengatur, dan menjalankan event di server.", link: "https://guns.lol/aeva", ppCustom: true, pp: "aeva eo.webp"},
+      {name: "Libra",role: "Event Organizer", desc: "Perancang dan pelaksana event. Bertugas membuat, mengatur, dan menjalankan event di server.", link: "https://www.instagram.com/_erlangga666?igsh=YXVuczF5Z2Z2b2p2", ppCustom: true, pp: "libra eo.webp"},
+      {name: "Khan",role: "Public Relations", desc: "Penghubung antara server dan komunitas luar. Mengurus kerja sama, promosi, sosial media.", link: "link", ppCustom: true, pp: "khan pr.webp"},
+      {name: "felice",role: "helper", desc: "Asisten ringan di komunitas. Memberikan bantuan kecil kepada member baru dan menjaga suasana tetap ramah.", link: "link", ppCustom: true, pp: "felice helper.webp"},
+      {name: "Khoir",role: "helper", desc: "Asisten ringan di komunitas. Memberikan bantuan kecil kepada member baru dan menjaga suasana tetap ramah.", link: "link", ppCustom: true, pp: "khoir helper.webp"},
+      {name: "Darwintara",role: "helper", desc: "Asisten ringan di komunitas. Memberikan bantuan kecil kepada member baru dan menjaga suasana tetap ramah.", link: "https://discord.gg/sPVwa5hk", ppCustom: true, pp: "darwintara helper.webp"},
+      {name: "Biksu Kucing",role: "helper", desc: "Asisten ringan di komunitas. Memberikan bantuan kecil kepada member baru dan menjaga suasana tetap ramah.", link: "https://www.instagram.com/kucing_knight?igsh=NHkweWpqYndsNjZo", ppCustom: true, pp: "biksu kucing helper.webp"},
+      {name: "Axion",role: "helper", desc: "Asisten ringan di komunitas. Memberikan bantuan kecil kepada member baru dan menjaga suasana tetap ramah.", link: "link", ppCustom: true, pp: "axion helper.webp"},
+      {name: "Belle",role: "helper", desc: "Asisten ringan di komunitas. Memberikan bantuan kecil kepada member baru dan menjaga suasana tetap ramah.", link: "link", ppCustom: true, pp: "belle helper.webp"},
+      {name: "Badi",role: "Designer", desc: "Bertanggung jawab dalam membuat dan mengelola aset visual yang digunakan di dalam server Discord.", link: "link", ppCustom: true, pp: "badi designer.webp"},
+      {name: "Lexa",role: "Designer", desc: "Bertanggung jawab dalam membuat dan mengelola aset visual yang digunakan di dalam server Discord.", link: "https://discord.gg/Zep3TZcJ", ppCustom: true, pp: "lexa designer.jpg"},
+      {name: "Pir",role: "Media", desc: "Alat komunikasi visual dan berbagi konten yang memperkaya interaksi dalam komunitas.", link: "link", ppCustom: true, pp:"pirr media.webp"},
+    ];
+
+    // Render Staff Cards
+    const grid = document.getElementById("staffGrid");
+
+    staff.forEach((s) => {
+      const card = document.createElement("article");
+      card.className = "card";
+
+      const initial = (s.name || "S").trim().charAt(0).toUpperCase();
+
+      card.innerHTML = `
+        <div class="pp">
+          ${s.ppCustom
+            ? `<img src="${s.pp}" alt="${s.name}">`
+            : `<div class="pp-initial">${initial}</div>`
+          }
+        </div>
+
+        <div class="name">${s.name}</div>
+        <div class="role">${s.role}</div>
+
+        <div class="desc">${s.desc}</div>
+
+        <a class="card-btn" href="${s.link}" target="_blank">🔗 Kunjungi</a>
+      `;
+
+      grid.appendChild(card);
+      revealObserver.observe(card);
+    });
+
+    // Update Total Staff otomatis
+    const totalStaffEl = document.getElementById("totalStaffValue");
+    if(totalStaffEl){
+      totalStaffEl.textContent = `${staff.length}+`;
+    }
+  </script>
+</body>
+</html>

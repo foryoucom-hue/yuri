@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Authenticating... - YURI BOT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #000000;
+      font-family: 'Roboto', system-ui, sans-serif;
+      overflow: hidden;
+      position: relative;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+      animation: twinkle 6s infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0%,100% { opacity: 0.5; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .auth-container {
+      text-align: center;
+      background: rgba(15, 10, 45, 0.85);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(168,85,247,0.4);
+      border-radius: 30px;
+      padding: 60px 80px;
+      box-shadow: 
+        0 0 60px rgba(168,85,247,0.4),
+        0 0 120px rgba(168,85,247,0.2);
+      max-width: 500px;
+    }
+
+    .spinner {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 30px;
+      border: 6px solid rgba(168,85,247,0.2);
+      border-top: 6px solid #a78bfa;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #a78bfa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #b0b0d0;
+      font-size: 1.2rem;
+      line-height: 1.6;
+    }
+
+    .success {
+      color: #4ade80;
+      font-weight: 700;
+      margin-top: 20px;
+      font-size: 1.3rem;
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-weight: 700;
+      margin-top: 20px;
+      font-size: 1.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <div class="auth-container">
+    <div class="spinner"></div>
+    <h1>Authenticating...</h1>
+    <p id="status">Memproses login Discord kamu...</p>
+  </div>
+
+  <script>
+    // Create stars
+    function createStars() {
+      const container = document.getElementById('stars');
+      for(let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.animationDelay = Math.random() * 6 + 's';
+        container.appendChild(star);
+      }
+    }
+    createStars();
+
+    // Handle OAuth callback
+    async function handleCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const error = urlParams.get('error');
+
+      if (error) {
+        document.getElementById('status').innerHTML = `
+          <span class="error">❌ Login gagal: ${error}</span><br>
+          <small style="color: #8080a0; margin-top: 10px; display: block;">Mengalihkan ke halaman login...</small>
+        `;
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 3000);
+        return;
+      }
+
+      if (!code) {
+        document.getElementById('status').innerHTML = `
+          <span class="error">❌ Kode autentikasi tidak ditemukan</span><br>
+          <small style="color: #8080a0; margin-top: 10px; display: block;">Mengalihkan ke halaman login...</small>
+        `;
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 3000);
+        return;
+      }
+
+      // Simulasi proses autentikasi (dalam implementasi nyata, ini akan berkomunikasi dengan backend)
+      try {
+        // CATATAN: Dalam implementasi production, kamu perlu backend server untuk:
+        // 1. Exchange code dengan access token
+        // 2. Fetch user data dari Discord API
+        // 3. Simpan session/token dengan aman
+        
+        // Untuk demo, kita simulasi dengan delay dan data dummy
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Simpan data user (DEMO - dalam production gunakan data real dari API)
+        const userData = {
+          id: 'demo_' + Date.now(),
+          username: 'Demo User',
+          discriminator: '0001',
+          avatar: null,
+          email: 'demo@yuribot.com'
+        };
+
+        // Simpan ke localStorage
+        localStorage.setItem('userLoggedIn', 'true');
+        localStorage.setItem('userData', JSON.stringify(userData));
+        localStorage.setItem('loginTime', new Date().getTime().toString());
+
+        // Tampilkan success
+        document.getElementById('status').innerHTML = `
+          <span class="success">✓ Login berhasil!</span><br>
+          <small style="color: #8080a0; margin-top: 10px; display: block;">Selamat datang, ${userData.username}! Mengalihkan...</small>
+        `;
+
+        // Redirect ke halaman yang dituju atau home
+        setTimeout(() => {
+          const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
+          sessionStorage.removeItem('redirectAfterLogin');
+          window.location.href = redirectUrl;
+        }, 2000);
+
+      } catch (err) {
+        console.error('Authentication error:', err);
+        document.getElementById('status').innerHTML = `
+          <span class="error">❌ Terjadi kesalahan saat login</span><br>
+          <small style="color: #8080a0; margin-top: 10px; display: block;">Silakan coba lagi...</small>
+        `;
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 3000);
+      }
+    }
+
+    // Run callback handler
+    handleCallback();
+  </script>
+</body>
+</html>
